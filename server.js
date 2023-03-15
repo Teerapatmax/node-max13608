@@ -31,7 +31,7 @@ app.get('/customer', function(req, res) {
   )
 })
 
-app.get('/order', function(req, res) {
+app.get('/orders', function(req, res) {
   connection.query(
     'SELECT * FROM a1_order',
     function(err, results) {
