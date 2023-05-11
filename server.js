@@ -21,15 +21,6 @@ app.get('/', function(req, res) {
   })
 })
 
-app.get('/top_products', function(req, res) {
-  connection.query(
-    'select C.NICKname,P.Pid, O.Qty, sum(O.Qty*P.Price) as Total_Price from a1_order as O inner join a1_product as P on O.Oid = P.Pid inner join a1_customer as C on C.Cid = O.Cid group by C.NICKname, O.Oid, O.Qty, P.Price order by Total_Price desc;;',
-    function(err, results) {
-      console.log(results) //แสดงผลที่ console
-      res.json(results) //ตอบกลับ request
-    }
-  )
-})
 
 app.get('/customer', function(req, res) {
   connection.query(
@@ -60,6 +51,35 @@ app.get('/product', function(req, res) {
     }
   )
 })
+
+// เรียงลับดับจากคนที่ซื้อเยอะ => น้อยที่สุด
+app.get("/top_customers", function (req, res) {
+  connection.query(
+    `SELECT 
+    C.NICKname, 
+    SUM(O.Qty*P.Price) AS price_sum 
+  FROM a1_customer AS C 
+    INNER JOIN a1_order AS O ON C.Cid = O.Oid
+    INNER JOIN a1_product AS P ON O.Pid = P.Pid 
+  GROUP BY 
+    C.Cid 
+  ORDER BY 
+    price_sum DESC;`,
+    function (err, results) {
+      res.json(results);
+    }
+  );
+});
+
+// เรียงลับดับจากคนที่ซื้อเยอะ => น้อยที่สุด
+app.get('/top_products', function(req, res){
+  connection.query(
+    `SELECT O.id, P.Pname, O.Qty, SUM(O.Qty) as Total_Qty FROM a1_order as O INNER JOIN a1_product as P ON O.Pid= P.Pid GROUP BY O.id, P.Pname, O.Qty, P.price ORDER BY Total_Qty DESC;`,
+    function (err, results) {
+      res.json(results);
+    }
+  );
+});
 
 app.listen(5000, () => {
   console.log('Server is started.')
